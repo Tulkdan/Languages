@@ -1,0 +1,91 @@
+* Condicionais
+E como toda linguagem de programacao, tambem temos condicionais para criar logicas nos nossos codigos.
+
+*lembrete que a identacao de nosso codigo eh de extrema importancia*
+
+#+begin_src haskell
+:{
+signum :: (Num a, Ord a) => a -> a
+signum n = if n < 0
+              then -1
+              else if n == 0
+                      then 0
+                      else 1
+:}
+
+signum 10
+#+end_src
+
+#+RESULTS:
+: 1
+
+#+begin_src haskell
+:{
+raizes2GrauV4 :: (Ord a, Floating a) => a -> a -> a -> (a, a)
+raizes2GrauV4 a b c =
+  if delta < 0
+  then error "Delta negativo"
+  else (x1, x2)
+  where
+    x1 = ((-b) + sqDelta) / (2 * a)
+    x2 = ((-b) - sqDelta) / (2 * a)
+    sqDelta = sqrt delta
+    delta = b^(2 :: Int) - 4 * a * c
+:}
+
+raizes2GrauV4 2 3 5
+#+end_src
+
+#+RESULTS:
+#+begin_example
+,*** Exception: Delta negativo
+CallStack (from HasCallStack):
+  error, called at <interactive>:55:8 in interactive:Ghci19
+#+end_example
+
+** Guards
+Tambem para facilitar a leitura e diminuir a verbosidade, podemos utilizar o *Guards* nas nossas funcoes para declarar a mesma encadeacao de condicionais feitas.
+#+begin_src haskell
+:{
+signumV2 :: (Num a, Ord a) => a -> a
+signumV2 n
+  | n < 0     = -1
+  | n == 0    = 0
+  | otherwise = 1
+:}
+
+signumV2 (-20)
+#+end_src
+
+#+RESULTS:
+: ghci> 
+: <interactive>:96:1-14: warning: [-Wtype-defaults]
+:     • Defaulting the following constraints to type ‘Integer’
+:         (Show a0) arising from a use of ‘print’ at <interactive>:96:1-14
+:         (Num a0) arising from a use of ‘it’ at <interactive>:96:1-14
+:         (Ord a0) arising from a use of ‘it’ at <interactive>:96:1-14
+:     • In a stmt of an interactive GHCi command: print it
+: -1
+
+** Pattern Matching
+Ou podemos tambem criar pattern matching para deixar as nossas declaracoes de funcoes mais explicitas e sem sintaxe de logica no nosso codigo, apenas declarando algumas verdades para serem executadas e avalidas mais tarde.
+
+#+begin_src haskell
+:{
+soma 0 y = y
+soma x 0 = x
+soma x y = x + y
+:}
+#+end_src
+
+Ou podemos ignorar completamente as variavel nas nossas declaracoes de variavel nos pattern matching utilizando o ~_~ como parametro
+#+begin_src haskell
+:{
+mult 0 _ = 0
+mult _ 0 = 0
+mult 1 y = y
+mult x 1 = x
+mult x y = x * y
+:}
+#+end_src
+

@@ -1,0 +1,191 @@
+* Listas
+Listas em Haskell tem o mesmo comportamento de listas ligadas, podemos declarar elas da seguinte forma
+#+begin_src haskell
+1 : 2 : 3 : []
+#+end_src
+
+#+RESULTS:
+: [1,2,3]
+
+Temos tambem o /sugar syntax/ para declarar listas da forma mais casual e esperada
+#+begin_src haskell
+[1, 2, 3]
+#+end_src
+
+#+RESULTS:
+: [1,2,3]
+
+Com isso, podemos aproveitar para gerar listas de forma lazy (e ate listas infinitas)
+#+begin_src haskell
+[1..10]
+#+end_src
+
+#+RESULTS:
+: [1,2,3,4,5,6,7,8,9,10]
+
+#+begin_src haskell
+:{
+indexa :: [a] -> Int -> a
+indexa xs i = head (drop i xs)
+:}
+
+xs = [0..200]
+xs `indexa` 35
+#+end_src
+
+#+RESULTS:
+: 35
+
+#+begin_src haskell
+:{
+fatorial :: Integer -> Integer
+fatorial n = product [2..n]
+:}
+
+fatorial 10
+#+end_src
+
+#+RESULTS:
+: 3628800
+
+** List Comprehension
+
+Desta maneira eh chamada de compreensao de listas
+#+begin_src haskell
+[x | x <-[0,2..100], x `mod` 6 == 0]
+#+end_src
+
+#+RESULTS:
+| 0 | 6 | 12 | 18 | 24 | 30 | 36 | 42 | 48 | 54 | 60 | 66 | 72 | 78 | 84 | 90 | 96 |
+
+Podemos tambem usar duas expressoes geradoras ao mesmo tempo
+#+begin_src haskell
+[(x, y) | x <-[0..5], y <-[11..16]]
+#+end_src
+
+#+RESULTS:
+| 0 | 11 |
+| 0 | 12 |
+| 0 | 13 |
+| 0 | 14 |
+| 0 | 15 |
+| 0 | 16 |
+| 1 | 11 |
+| 1 | 12 |
+| 1 | 13 |
+| 1 | 14 |
+| 1 | 15 |
+| 1 | 16 |
+| 2 | 11 |
+| 2 | 12 |
+| 2 | 13 |
+| 2 | 14 |
+| 2 | 15 |
+| 2 | 16 |
+| 3 | 11 |
+| 3 | 12 |
+| 3 | 13 |
+| 3 | 14 |
+| 3 | 15 |
+| 3 | 16 |
+| 4 | 11 |
+| 4 | 12 |
+| 4 | 13 |
+| 4 | 14 |
+| 4 | 15 |
+| 4 | 16 |
+| 5 | 11 |
+| 5 | 12 |
+| 5 | 13 |
+| 5 | 14 |
+| 5 | 15 |
+| 5 | 16 |
+
+** Concat
+
+Its the same as a flatten from languages
+#+begin_src haskell
+concat [[1,2,4], [6,7,8]]
+#+end_src
+
+#+RESULTS:
+| 1 | 2 | 4 | 6 | 7 | 8 |
+
+** Creating ~length~ with list comprehension
+#+begin_src haskell
+tam xs = sum [1 | _ <- xs]
+
+tam [1..10]
+#+end_src
+
+#+RESULTS:
+: Prelude> 10
+
+* Recursion
+Aqui em Haskell nao temos stack overflow, como as funcoes sao de forma lazy ele ira a cada vez da recursao substituir com os novos valores na expressao.
+Seguindo o exemplo seguinte de fatorial:
+#+begin_src haskell
+:{
+fatorial2 :: Integer -> Integer
+fatorial2 0 = 1
+fatorial2 n = n * fatorial2 (n - 1)
+:}
+
+fatorial2 3
+#+end_src
+
+#+RESULTS:
+: Prelude> 6
+
+A execucao do ~fatorial2~ seria dessa forma:
+#+BEGIN_EXAMPLE
+= 3 * fatorial2 (3 - 1)
+= 3 * 2 * fatorial2 (2 - 1)
+= 3 * 2 * 1 * fatorial2 (1 - 1)
+= 3 * 2 * 1 * 1
+#+END_EXAMPLE
+
+Com isso, o Haskell nao ira criar uma pilha de execucao como visto em outras linguagens
+
+** Tail recursion
+Para um exemplo de tail recursion, podemos usar um exemplo para realizar o mdc
+#+begin_src haskell
+:{
+mdc :: Int -> Int -> Int
+mdc a 0 = a
+mdc a b = mdc b (a `mod` b)
+:}
+
+mdc 48 18
+#+end_src
+
+#+RESULTS:
+: Prelude> 6
+
+Neste exemplo, diferente do modo recursivo que a cada iteracao ira ser substituido os valores e aumentando o tamanho de nossa expressao, neste exemplo de MDC a gente mantem um tamanho fixo de expressao e de pilha.
+O Haskell ira realizar as seguintes operacoes:
+#+BEGIN_EXAMPLE
+= mdc 48 18
+= mdc 18 12
+= mdc 12 6
+= mdc 6 0
+= 6
+#+END_EXAMPLE
+
+* Quick Sort implementation
+#+begin_src haskell
+:{
+qsort :: Ord a => [a] -> [a]
+qsort [] = []
+qsort (x:xs) =
+  (qsort menores) ++ [x] ++ (qsort maiores)
+  where
+    menores = [e | e <- xs, e < x]
+    maiores = [e | e <- xs, e >= x]
+:}
+
+qsort [6,7,5,3,4,20,4444,6,89,4]
+#+end_src
+
+#+RESULTS:
+: Prelude> [3,4,4,5,6,6,7,20,89,4444]

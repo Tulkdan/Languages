@@ -1,0 +1,35 @@
+* Assinatura de funcao
+As assinaturas de funcoes servem para declarar a tipagem que nossa funcao ira usar, retornar e os parametros que utilizaremos na funcao.
+
+#+begin_src haskell
+:{
+raizes2Grau :: Floating a => a -> a -> a -> (a, a)
+raizes2Grau a b c = (((-b) + sqrt(b^(2 :: Int) - 4 * a * c))/ (2 * a),
+                    ((-b) - sqrt(b^(2 :: Int) - 4 * a * c))/ (2 * a))
+:}
+
+raizes2Grau 2 3 5
+#+end_src
+
+#+RESULTS:
+: (NaN,NaN)
+
+** Clausula "where"
+Para facilitar a leitura e dividir as funcionalidades e facilitar a leitura, podemos declarar trechos do codigo para variaveis dentro da funcao a fim de facilitar a leitura e poder reaproveitar codigo dentro de nossas funcoes.
+
+#+begin_src haskell
+:{
+raizes2GrauV2 :: Floating a => a -> a -> a -> (a, a)
+raizes2GrauV2 a b c = (x1, x2)
+  where
+    x1 = ((-b) + sqDelta) / (2 * a)
+    x2 = ((-b) - sqDelta) / (2 * a)
+    sqDelta = sqrt delta
+    delta = b^2 - 4 * a * c
+:}
+
+raizes2GrauV2 2 3 (-5)
+#+end_src
+
+#+RESULTS:
+: (1.0,-2.5)
