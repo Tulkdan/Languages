@@ -1,0 +1,8 @@
+* Languages
+
+This repo I'm using to learn languages from any source.
+Some files should be only the classes that I'm seeing or sometimes some challenges so I can try and see if I can resolve them.
+
+Each language that I will be studying should have a directory for it so the navigation will be self-sufficient.
+
+All the files should be on =.org= so I can also practice literate programming.
