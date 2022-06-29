@@ -1,0 +1,63 @@
+* Type
+
+No Haskell tambem conseguimos declarar aliases para tipos customizaveis, a vantagem disso sera para nao repetir logicas perante o nosso codigo e tambem deixar ele mais declarativo, dando nomes para declaracoes conseguimos que outras pessoas consigam compreender melhor o nosso codigo.
+
+Segue um exemplo de caso nao usarmos:
+#+begin_src haskell
+:{
+troco :: (Integer, String, Double) -> (Integer, String, Double) -> Double
+troco (idProd, nome, preco) (idCli, nomeCli, pago) = pago - preco
+:}
+#+end_src
+
+Dessa forma declarada, conseguimos saber o que cada um significa e a diferenca entre eles, porem para alguem que deseja utilizar essa funcao e querer usar ela, pode ficar um pouco confusa em saber como podera utilizar e que ordem passar os argumentos, ja que nao temos como diferencias o dados passados sem olhar a implementacao
+#+begin_src haskell
+prod = (1, "queijo", 100)
+cli = (1, "Lucas", 200)
+
+troco prod cli
+troco cli prod
+#+end_src
+
+Criando um custom type, podemos criar tipos com aliases que melhor descrevem os argumentos que nossa funcao devera receber e o que cada um significa.
+Para declararmos um custom type utilizamos a palavra reservada ~type~ do Haskell.
+
+Utilizando no exemplo acima a funcao poderia ficar assim:
+#+begin_src haskell
+type Produto = (Integer, String, Double)
+type Cliente = (Integer, String, Double)
+
+:{
+troco :: Produto -> Cliente -> Double
+troco (idProd, nome, preco) (idCli, nomeCli, pago) = pago - preco
+:}
+#+end_src
+
+Desta forma podemos deixar mais claro a intencao da nossa funcao e seus argumentos
+
+Porem, ainda assim o usuario ainda pode inverter a ordem dos dados passados, ele pode passar um ~Cliente~ no lugar do ~Produto~ e nossa funcao ira aceitar, porem ira retornar o valor errado.
+Como apenas criamos um alias para as funcoes que possuem o mesmo tipo, o Haskell nao ira diferenciar os tipos pelos aliases, o que ira ocorrer na hora da compilacao do projeto sera a seguinte etapa:
+1. Ira substituir no programa todos os lugares que apontam para os aliases e colocar o tipo
+2. Ira realizar a validacao dos tipos para ver se batem
+
+Com isso, como nossos tipos sao a mesma tupla, a linguagem nao ira diferenciar e ira aceitar.
+
+** Generic
+Tambem podemos declarar aliases de forma generica, sem especificar o tipo hardcoded e deixando apenas para quando formos implementar/usar.
+Para declarar eh algo bem semelhante a declaracao de funcao:
+#+begin_src haskell
+type Assoc k v = [(k,v)]
+
+:{
+find :: Eq k => k -> Assoc k v -> v
+find k t = head [v | (k', v) <- t, k'==k]
+:}
+#+end_src
+
+Desta forma criamos o alises ~Assoc~ que recebe dois valores de forma generica, nao precisamos definir o ~k~ ou o ~v~, essa definicao soh sera feita quando os dados que forem passados para a funcao.
+
+** Recursion
+Nao podemos criar types de forma recursiva, entao a seguinte declaracao de uma arvore nao eh possivel com types:
+#+begin_src haskell
+type binaryTree a = (binaryTree a, a, binaryTree a)
+#+end_src
