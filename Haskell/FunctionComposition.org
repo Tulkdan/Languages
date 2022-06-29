@@ -1,0 +1,33 @@
+* Function Composition
+
+Composicao de funcao tem a mesma sintaxe e declarao quando utilizamos na matematica, segue um exemplo de como seria o assinatura da funcao:
+#+begin_src haskell
+(f . g) x = f (g x)
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+f . g == f (g x)
+#+end_src
+
+Nessa assinatura, declaramos que recebemos uma funcao que recebe B e retorna C (esta primeira ira receber o valor da proxima funcao), a proxima funcao que ira receber A e retornar B (alimentando assim a primeira funcao) e que no final nos retornara uma ultima funcao que ira receber A (entrada da segunda funcao) e retornara C (saida da primeira funcao).
+
+Com isso podemos deixar de forma sequecial a ordem de execucao das funcoes e facilitando assim a leitura do codigo.
+
+Com essas ideias, podemos levar em consideracao a seguinte implementacao:
+#+begin_src haskell
+somaDosQuadradosImpares =
+    sum (takeWhile (<1000) (filter odd (map (^2) [1..]))))
+#+end_src
+
+Podemos reescrever essa funcao utilizando o operador ~pipe~ (~$~):
+#+begin_src haskell
+somaDosQuadradosImpares' = sum
+                        $ takeWhile (<1000)
+                        $ filter odd
+                        $ map (^2) [1..]
+#+end_src
+
+E por ultimo, a versao utilizando composicao de funcao:
+#+begin_src haskell
+somaDosQuadradosImpares'' = sum . takeWhile (<1000) . filter odd . map (^2) $ [1..]
+#+end_src
+
+Todas realizam a mesma operacao, o que ira facilitar seria a legibilidade da funcao para os demais desenvolvedores.
