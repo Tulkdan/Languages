@@ -58,13 +58,6 @@ signumV2 (-20)
 #+end_src
 
 #+RESULTS:
-: ghci> 
-: <interactive>:96:1-14: warning: [-Wtype-defaults]
-:     • Defaulting the following constraints to type ‘Integer’
-:         (Show a0) arising from a use of ‘print’ at <interactive>:96:1-14
-:         (Num a0) arising from a use of ‘it’ at <interactive>:96:1-14
-:         (Ord a0) arising from a use of ‘it’ at <interactive>:96:1-14
-:     • In a stmt of an interactive GHCi command: print it
 : -1
 
 ** Pattern Matching
