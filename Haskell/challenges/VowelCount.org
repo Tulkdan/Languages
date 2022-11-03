@@ -1,0 +1,35 @@
+* Descending Order
+
+[[https://www.codewars.com/kata/54ff3102c1bad923760001f3/train/haskell][Link for the challenge on codewars]]
+
+Return the number (count) of vowels in the given string.
+
+We will consider a, e, i, o, u as vowels for this Kata (but not y).
+
+The input string will only consist of lower case letters and/or spaces.
+
+#+begin_src haskell
+:{
+getCount :: String -> Int
+getCount xs = foldl (+) 0 [1 | v <- xs, v `elem` "aeiou"]
+:}
+
+getCount "banana"
+#+end_src
+
+#+RESULTS:
+: Prelude> 3
+
+Clear solution
+
+#+begin_src haskell
+:{
+getCount :: String -> Int
+getCount = length . filter (`elem` "aeiou")
+:}
+
+getCount "abracadabra"
+#+end_src
+
+#+RESULTS:
+: Prelude> 5

@@ -1,0 +1,47 @@
+* Descending Order
+
+[[https://www.codewars.com/kata/5467e4d82edf8bbf40000155/train/haskell][Link for the challenge on codewars]]
+
+Your task is to make a function that can take any non-negative integer as an argument and return it with its digits in descending order. Essentially, rearrange the digits to create the highest possible number.
+
+#+begin_src haskell
+:{
+digs :: Integer -> [Integer]
+digs 0 = []
+digs x = digs (x `div` 10) ++ [x `mod` 10]
+
+qsort [] = []
+qsort (x:xs) =
+    (qsort lower) ++ [x] ++ (qsort higher)
+    where
+        lower = [e | e <- xs, e < x]
+        higher = [e | e <- xs, e >= x]
+
+listToInt [] _ = 0
+listToInt mul (x:xs) = foldl ((x * mul) +) listToInt (mul*10) xs
+
+descendingOrder :: Integer -> Integer
+descendingOrder x = listToInt (qsort . digs $ x) 1 
+:}
+
+descendingOrder 42145
+#+end_src
+
+#+RESULTS:
+: Prelude> 54421
+
+Clear solution
+
+#+begin_src haskell
+:{
+import Data.List (sort)
+
+descendingOrder :: Integer -> Integer
+descendingOrder x = (read . reverse . sort . show) x
+:}
+
+descendingOrder 42145
+#+end_src
+
+#+RESULTS:
+: Prelude> 54421
