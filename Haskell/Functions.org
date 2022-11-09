@@ -33,3 +33,27 @@ raizes2GrauV2 2 3 (-5)
 
 #+RESULTS:
 : (1.0,-2.5)
+
+** Clausula "let in"
+Ela eh bem semelhando a clausula ~where~, porem o escopo das definicoes declaradas soh sao acessadas dentro do escopo do ~in~.
+#+begin_src haskell
+:{
+cylinder :: (RealFloat a) => a -> a -> a
+cylinder r h =
+    let sideArea = 2 * pi * r * h
+        topArea = pi * r ^2
+    in sideArea + 2 * topArea
+:}
+
+cylinder 2 5
+#+end_src
+
+#+RESULTS:
+: Prelude> 87.96459430051421
+
+Tambem eh possivel declarar funcoes dentro do escopo do ~let~
+#+begin_src haskell
+[let square x = x * x in (square 5, square 3, square 2)]
+#+end_src
+
+#+RESULTS:
