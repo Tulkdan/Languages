@@ -61,3 +61,103 @@ Nao podemos criar types de forma recursiva, entao a seguinte declaracao de uma a
 #+begin_src haskell
 type binaryTree a = (binaryTree a, a, binaryTree a)
 #+end_src
+
+* Custom types
+Tambem podemos declarar tipos customizaveis
+
+#+begin_src haskell
+  data Shape = Circle Float Float Float | Rectangle Float Float Float Float
+#+end_src
+
+#+RESULTS:
+: Rectangle :: Float -> Float -> Float -> Float -> Shape
+
+#+begin_src haskell
+  :{
+  surface :: Shape -> Float
+  surface (Circle _ _ r) = pi * r ^ 2
+  surface (Rectangle x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
+  :}
+
+  surface $ Circle 10 20 10
+  surface $ Rectangle 0 0 100 100
+#+end_src
+
+#+RESULTS:
+: 10000.0
+
+Utilizando o =derinving= keyword podemos fazer com que o Haskell consiga printar os nossos tipos customizaveis junto com seus valores
+
+#+begin_src haskell
+  data Shape = Circle Float Float Float | Rectangle Float Float Float Float deriving (Show)
+
+  (Circle 10 20 5, Rectangle 50 230 60 90)
+#+end_src
+
+#+RESULTS:
+: Prelude> (Circle 10.0 20.0 5.0,Rectangle 50.0 230.0 60.0 90.0)
+
+* Record syntax
+Record syntax eh utilizado para facilitar na hora de criarmos types mais complexos e com mais dados.
+Imagine um type do tipo =Person= onde iremos precisar do primeiro nome, ultimo nome, idade, altura, telefone and sorvete favorito.
+Podemos descrever esse tipo desta forma;
+#+begin_src haskell
+  data Person = Person String String Int Float String String deriving (Show)
+
+  let guy = Person "Buddy" "LastName" 43 184.2 "1234-5678" "Chocolate"
+  guy
+#+end_src
+
+#+RESULTS:
+: Prelude> Prelude> Person "Buddy" "LastName" 43 184.2 "1234-5678" "Chocolate"
+
+Mas se usarmos o =record syntax= para declarar a o mesmo tipo, temos uma sintaxe mais amigavel e facil de ler
+#+begin_src haskell
+  :{
+     data Person = Person { firstName :: String
+                          , lastName :: String
+                          , age :: Int
+                          , height :: Float
+                          , phoneNumber :: String
+                          , flavour :: String
+                          } deriving (Show)
+  :}
+
+  let guy = Person { firstName = "Buddy 2", lastName = "LastName", age = 43, height = 184.2, phoneNumber = "1234-5678", flavour = "Chocolate" }
+  guy
+#+end_src
+
+#+RESULTS:
+: Prelude> Prelude> Person {firstName = "Buddy 2", lastName = "LastName", age = 43, height = 184.2, phoneNumber = "1234-5678", flavour = "Chocolate"}
+
+A vantagem tambem aparece na hora de printarmos o tipo, onde tambem podemos ver os campos e seus repectivos valores.
+
+** Estrutura de dados recursiva
+Vamos criar uma arvore binaria em Haskell :)
+
+#+begin_src haskell
+  :{
+  data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+  treeInsert :: (Ord a) => a -> Tree a -> Tree a
+  treeInsert x EmptyTree = Node x EmptyTree EmptyTree
+  treeInsert x (Node a left right)
+    | x == a = Node x left right
+    | x < a  = Node a (treeInsert x left) right
+    | x > a  = Node a left (treeInsert x right)
+
+  treeElem :: (Ord a) => a -> Tree a -> Bool
+  treeElem x EmptyTree = False
+  treeElem x (Node a left right)
+    | x == a = True
+    | x < a  = treeElem x left
+    | x > a  = treeElem x right
+  :}
+
+  let nums = [8,6,4,1,7,3,5]
+  let numsTree = foldr treeInsert EmptyTree nums
+  treeElem 8 numsTree
+#+end_src
+
+#+RESULTS:
+: Prelude> Prelude> Prelude> True
