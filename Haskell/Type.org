@@ -161,3 +161,74 @@ Vamos criar uma arvore binaria em Haskell :)
 
 #+RESULTS:
 : Prelude> Prelude> Prelude> True
+
+* Typeclasses
+A typeclass defines some behavior (like comparing for equality, comparing for ordering, enumeration) and then types that can behave in that way are made instances of that typeclass. The behavior of typeclasses is achieved by defining functions or just type declarations that we then implement. So when we say that a type is an instance of a typeclass, we mean that we can use the functions that the typeclass defines with that type.
+#+begin_src haskell
+  :{
+  class Eq a where
+      (==) :: a -> a -> Bool
+      (/=) :: a -> a -> Bool
+      x == y = not (x /= y)
+      x /= y = not (x == y)
+
+  data TrafficLight = Red | Yellow | Green
+
+  instance Eq TrafficLight where
+      Red == Red = True
+      Green == Green = True
+      Yellow == Yellow = True
+      _ == _ = False
+
+  instance Show TrafficLight where
+      show Red = "Red light"
+      show Green = "Green light"
+      show Yellow = "Yellow light"
+  :}
+
+  Red
+#+end_src
+
+#+RESULTS:
+: Prelude> Red light
+
+** Yes-no typeclasses
+Let's create the way that the javascript treats values as truthy and falsy in Haskell, for exemple, the following examples:
+#+begin_src javascript
+  if (0) console.log("YEAH!") else console.log("NO!")
+  if ("") console.log("YEAH!") else console.log("NO!")
+  if (false) console.log("YEAH!") else console.log("NO!")
+  if ("WHAT") console.log("YEAH!") else console.log("NO!")
+#+end_src
+
+In Haskell, we can only use the value inside a =if= when is of type =Bool=, but now let's implement a function that'll have this behaviour:
+#+begin_src haskell
+  :{
+  class YesNo a where
+      yesno :: a -> Bool
+
+  instance YesNo Int where
+      yesno 0 = False
+      yesno _ = True
+
+  instance YesNo [a] where
+      yesno [] = False
+      yesno _ = True
+
+  instance YesNo Bool where
+      yesno = id
+
+  instance YesNo (Maybe a) where
+      yesno (Just _) = True
+      yesno Nothing = False
+
+  yesnoIf :: (YesNo y) => y -> a -> a -> a
+  yesnoIf yesnoVal yesResult noResult = if yesno yesnoVal then yesResult else noResult
+  :}
+
+  yesnoIf (Just 500) "YEAH!" "NO!"
+#+end_src
+
+#+RESULTS:
+: Prelude> "YEAH!"
+
