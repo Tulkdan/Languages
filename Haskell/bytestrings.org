@@ -1,0 +1,25 @@
+* Bytestrings
+
+Processing files as strings has one drawback: it tends to be slow.
+~String~ is a type synonym for ~[Char]~.
+~Char~ don't have a fixed size, because it takes several bytes to represent a character from, say, Unicode.
+
+That overhead doesn't bother us so much most of the time, but it turns out to be a liability when reading big files and manipulating them.
+That's why Haskell has *bytestrings*.
+Bytestrings are sort of like lists, only each element ir one byte (or 8 bits) in size.
+The way they handle laziness is also different.
+
+Bytestrings come in two flavors: strict and lazy ones.
+
+=Strict bytestrings= resides in *Data.ByteString* and they do away with the laziness completely.
+There are no promises involved; a strict bytestring represents a series of bytes in an array.
+You can't have things like infinite strict bytestrings.
+If you evaluate the first byte of a strict bytestring, you have to evaluate it whole.
+
+=Lazy bytestrings= resides in *Data.ByteString.Lazy*.
+They're lazy, but not quite as lazy as lists.
+Lazy bytestrings take a different approach - they are stored in chunks each chunk has a size of 64K.
+When you process a file with lazy bytestrings, it will be read chunk by chunk.
+This is cool because it won't cause the memory usage to skyrocket and the 64K probably fits neatly into your CPU's L2 cache.
+
+[[file:files/bytestringscopy.hs][Example using lazy bytrestring to copy file]]
