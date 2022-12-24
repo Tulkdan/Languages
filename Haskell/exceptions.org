@@ -1,0 +1,13 @@
+* Exceptions
+
+Pure functions are lazy by default, which means that we don't know when they will be evaluated and that it really shouldn't matter.
+However, once pure functions start throwing exceptions, it matters when they are evaluated.
+That's why we can only catch exceptions thrown from pure functions in the I/O part of our code.
+And that's bad because we want to keep the I/O part as small as possible.
+However, if we don't catch them in the I/O part of our code, our program crashes.
+The solution? Don't mix exceptions and pure code.
+Take advantage of Haskell's powerful type system and use types like *Either* and *Maybe* to represent results that may have failed.
+
+Let's make an example using *catch* to treat errors when opening a file that does not exists.
+
+[[file:files/countLinesException.hs][Example of exception handling]]
