@@ -1,0 +1,125 @@
+* Reverse Polish Notation Calculator
+
+[[https://en.wikipedia.org/wiki/Reverse_Polish_notation][Link for the wikipedia for the explanation]]
+
+#+begin_src haskell
+  import Data.List
+#+end_src
+
+#+RESULTS:
+
+#+begin_src haskell
+  :{
+  solveRPN :: String -> Float
+  solveRPN = head . foldl foldingFunction [] . words
+      where foldingFunction (x:y:ys) "*" = (x * y):ys
+	    foldingFunction (x:y:ys) "+" = (x + y):ys
+	    foldingFunction (x:y:ys) "-" = (y - x):ys
+	    foldingFunction (x:y:ys) "/" = (y / x):ys
+	    foldingFunction (x:y:ys) "^" = (y ** x):ys
+	    foldingFunction (x:xs) "ln" = log x:xs
+	    foldingFunction xs "sum" = [sum xs]
+	    foldingFunction xs numberString = read numberString:xs
+  :}
+
+  solveRPN "10 10 10 10 sum 4 /"
+#+end_src
+
+#+RESULTS:
+: Prelude Data.List> 10.0
+
+* Heathrow to London
+
+Your plane just landed in England and you rent a car.
+You have a meeting really soon and you have to get fro Heathrow Airport to London as fast as you can (but safely!).
+
+There are two main roads going from Heathrow to London and there's a number of regional roads crossing them.
+It takes you a fixed amount of time to travel from one crossroads to another.
+It's up to you to find the optimal path to take so that you get to London as fast as you can!
+You start on the lest side and can either cross to the other main road or go forward.
+
+Our job is to make a program that takes input that represents a road system and print out what the shortert path across it is.
+Here's what the input would look like for this care:
+
+#+begin_example
+  50
+  10
+  30
+  5
+  90
+  20
+  40
+  2
+  25
+  10
+  8
+  0
+#+end_example
+
+To mentally parse the input file, read it in threes and mentally split the road system into sections.
+Each section is comprised of a road A, road B and a crossing road.
+To have it neatly fit into threes, we say that there's a last crossing section that takes 0 minutes to drive over.
+That's because we don't care where we arrive in London, as long as we're in London.
+
+To get the best path we do this: first we see what the best path to the next crossroads on main road A is.
+The two options are going directly forward or starting at the opposite road, going forward and then crossing over.
+We remember the cost and the path. We use the same method to see what the best path to the next crossroads on main road B is and remember that.
+Then, we see if the path to the next crossroads on A is cheaper if we go prom the previous A crossroads or if we to from the previous B crossroads and then cross over.
+We remember the cheaper path and then we to the same for the crossroads opposite of it.
+We do this for every section until we reach the end.
+Once we've reachead the end, the cheapest of the two paths that we have is our optimal path!
+
+So in essence, we keep one shortest path on the road A and one path on the B road and when we reach the end, the shorter of those two ir our path.
+
+#+begin_src haskell
+  :{
+  data Section = Section { getA :: Int, getB :: Int, getC :: Int } deriving (Show)
+  type RoadSystem = [Section]
+
+  heathrowToLondon :: RoadSystem
+  heathrowToLondon = [Section 50 10 30, Section 5 90 20, Section 40 2 25, Section 10 8 0]
+
+  data Label = A | B | C deriving (Show)
+  type Path = [(Label, Int)]
+
+  roadStep :: (Path, Path) -> Section -> (Path, Path)
+  roadStep (pathA, pathB) (Section a b c) =
+    let priceA = sum $ map snd pathA
+	priceB = sum $ map snd pathB
+	forwardPriceToA = priceA + a
+	crossPriceToA = priceB + b + c
+	forwardPriceToB = priceB + b
+	crossPriceToB = priceA + a + c
+	newPathToA = if forwardPriceToA <= crossPriceToA
+			then (A,a):pathA
+			else (C,c):(B,b):pathB
+	newPathToB = if forwardPriceToB <= crossPriceToB
+			then (B,b):pathB
+			else (C,c):(A,a):pathA
+
+    in (newPathToA, newPathToB)
+
+
+  optimalPath :: RoadSystem -> Path
+  optimalPath roadSystem =
+    let (bestAPath, bestBPath) = foldl roadStep ([], []) roadSystem
+    in if sum (map snd bestAPath) <= sum (map snd bestBPath)
+	then reverse bestAPath
+	else reverse bestBPath
+
+  resolveProblem :: RoadSystem
+  resolveProblem roadSystem =
+    let path = optimalPath roadSystem
+	pathString = concat $ map (show . fst) path
+	pathPrice = sum $ map snd path
+    putStrLn $ "The best path to take is: " ++ pathString
+    putStrLn $ "The price is: " ++ pathPrice
+  :}
+
+  resolveProblem heathrowToLondon
+#+end_src
+
+#+RESULTS:
+: Prelude Data.List> 
+: <interactive>:208:1-14: error:
+:     Variable not in scope: resolveProblem :: RoadSystem -> t
