@@ -79,3 +79,127 @@ Or to write it in another way, for any functor /F/, the following should hold: =
 
  If we can show that some type obeys both functor laws, we can rely on it having the same fundamental behaviors as othes functors when it comes to mapping.
  We can know that when we use =fmap= on it, there won't be anything other than mapping going on behind the scenes and that it will act like a thing that can be mapped over, i.e. a functor.
+
+* Applicative functors
+In this section, we'll take a look at applecative functors, which are beefed up functors, represented in Haskell by the =Applicative= typeclass, found in the =Control.Applicative= module.
+
+When we were mapping functions over functors, we usually mapped functions that take only one parameter.
+But what happens when we map a function like =*=, which takes two parameters, over a functor?
+If we have =Just 3= and we do =fmap (*) (Just 3)=, what do we get?
+From the instance implementation of =Maybe= for =Functor=, we know that if it's a =Just something= value, it will apply the function to the =something= inside the =Just=.
+Therefore, doing =fmap (*) (Just 3)= result in =Just ((*) 3)=, which can also be written as =Just (* 3)= if we use sections.
+
+#+begin_src haskell
+  :t fmap compare (Just 'a')
+#+end_src
+
+#+RESULTS:
+: fmap compare (Just 'a') :: Maybe (Char -> Ordering)
+
+We see how by mapping "multi-parameter" functions over functors, we get functors that contain functions inside them. So now what can we do with them?
+Well for one, we can map functions that take these functions as parameters over them, because whetever is inside a functor will be given to the function that we're mapping over it as a parameter.
+
+#+begin_src haskell
+  :{
+    let a = fmap (*) [1,2,3,4]
+  :}
+
+  fmap (\f -> f 9) a
+#+end_src
+
+#+RESULTS:
+: Prelude> [9,18,27,36]
+
+But what if we have a functor value of =Just (3 *)= and a functor value of =Just 5= and we want to take out the function from =Just (3 *)= and map it over =Just 5=?
+With normal functors, we're out of luck, because all they support is just mapping normal functinos over existing functors.
+
+Meet the =Applicative= typeclass. It lies in the =Control.Applicative= module and it defines two methods, =pure= and =<*>=.
+It doesn't provide a default implementation for any of them, so we have to define them both if we want something to be an applicative functor.
+The class is defined like so:
+
+#+begin_src haskell
+  class (Functor f) => Applicative f where
+      pure :: a -> f a
+      (<*>) :: f (a -> b) -> f a -> f b
+#+end_src
+
+This simple three line class definition tells us a lot! Let's start at the first line.
+It starts the definition of the =Applicative= class and it also introduces a class constraint.
+It says that if we want to make a type constructor part of the =Applicative= typeclass, it has to be in =Functor= first.
+That's why if we know that if a type constructor is part of the =Applicative= typeclass, it's also in =Functor=, so we can use =fmap= on it.
+
+The first method it defines is called =pure=.
+Which takes a value and puts it in some sort of default (or pure) context - a minimal context that still yields that value.
+
+The =<*>= function is really interesting. It has a type declaration of =f (a -> b) -> f a -> f b=.
+Which remembers a lot of =fmap=. Whereas =fmap= takes a function and a functor and applies the function inside the functor, =<*>= takes a functor that has a function in it and another functor and sort of extracts that function from the first functor and then maps it over the second one.
+When I say /extract/, I actually sort of mean /run/ and then extract, maybe even /sequence/.
+
+* The newtype keyword
+In the previous section, we saw that there are actually more ways for the list type to be an applicative functor.
+One way is to have =<*>= take every function out of the list that is its left parameter and apply it to every value in the list that is on the right, resulting in every possible combination of applying a function from the left to a value in the right list.
+#+begin_src haskell
+[(+1), (*100), (*5)] <*> [1,2,3]
+#+end_src
+
+#+RESULTS:
+
+The second way it to take the first function on the left side of =<*>= and apply it to the first value on the right, then take the second function from the list on the left side and apply it to the second value on the right, and so on.
+Ultimately, it's kind of like zipping the two lists together.
+But lists are already an instance of =Applicative=, so how did we also make lists an instance of =Applicativi= in this second way?
+If you remember, we said that the =ZipList a= type was introduced for this reason, which has one value constructor, =ZipList=, that has just one field.
+We put the list that we're wrapping in that field. Then, =ZipList= was made an instance of =Applicative=, so that when we want to use lists as applicatives in the zipping manner, we just wrap them with the =ZipList= constructor and then once we're done, unwrap them with =getZipList=:
+
+#+begin_src haskell
+getZipList $ ZipList [(+1), (*100), (*5)] <*> ZipList [1,2,3]
+#+end_src
+
+#+RESULTS:
+
+So, what does this have to do with this /newtype/ keyword?
+Well, think about how we might write the data declaration for our =ZipList a= type.
+One way would be todo it like so:
+
+#+begin_src haskell
+data ZipList a = ZipList [a]
+#+end_src
+
+A type that has just one value constructor and that value constructor has just one field taht is a list of things.
+We might also want to use record syntax so that we automatically get a function that extracts a list from a =ZipList=:
+
+#+begin_src haskell
+data ZipList a = ZipList { getZipList :: [a] }
+#+end_src
+
+The /newtype/ keyword in Haskell is made exactly for these cases when we want to just take one type and wrap it in something to present it as another type.
+In the actual libraries, =ZipList a= is defined like this:
+#+begin_src haskell
+newtype ZipList a = ZipList { getZipList :: [a] }
+#+end_src
+
+Instead of the /data/ keyword, the /newtype/ keyword is used.
+Now why is that? Well for one, /newtype/ is faster.
+If you use the /data/ keyword to wrap a type, there's some overhead to all that wrapping and unwrapping when your program is running.
+But if you use /newtype/, Haskell knows that you're just using it to wrap an existing type into a new type (hence the name), because you want it to be the same internally but have a different type.
+With that in mind, Haskell can get rid of the wrapping and unwrapping once it resolves which value is of what type.
+
+So why not just use /newtype/ all the time instead of /data/ then?
+Well, when you make a new type from an existing type by using the /newtype/ keyword, you can only have one value constructor and that value constructor can only have one field.
+But with /data/, you can make data types that have several value constructors and each constructor can have zero or more fields:
+#+begin_src haskell
+  data Profession = Fighter | Archer | Accontant
+
+  data Race = Human | Elf | Orc | Goblin
+
+  data PlayerCharacter = PlayerCharacter Race Profession
+#+end_src
+
+When using /newtype/, you're restricted to just one constructos with one field.
+
+We can also use the /deriving/ keyword with /newtype/ just like we would with /data/.
+We can derive instances for =Eq=, =Ord=, =Enum=, =Bounded=, =Show= and =Read=.
+If we derive the instance for a type class, the type that we're wrapping has to be in that type class to begin with.
+It makes sense, because /newtype/ just wraps an existing type. So now if we do the following, we can print and equate values of our new type:
+#+begin_src haskell
+newtype CharList = CharList { getCharList :: [Char] } deriving (Eq, Show)
+#+end_src
