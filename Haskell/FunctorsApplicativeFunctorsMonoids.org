@@ -203,3 +203,111 @@ It makes sense, because /newtype/ just wraps an existing type. So now if we do t
 #+begin_src haskell
 newtype CharList = CharList { getCharList :: [Char] } deriving (Eq, Show)
 #+end_src
+
+** Using /newtype/ to make type class instances
+Many times we want to make our types instances of certain types classes, but the type parameters just don't hatck up for what we want to do.
+It's easy to make =Maybe= an instance of =Functor=, because the =Functor= type class is defined like this:
+#+begin_src haskell
+  class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+#+end_src
+
+So we just start out with:
+#+begin_src haskell
+  instance Functor Maybe where
+#+end_src
+
+And then implement =fmap=.
+All the type parameters add up because the =Maybe= takes the place of =f= in the definition of the =Functor= type class and so if we look at =fmap= like it only worked on =Maybe=, it ends up behaving like:
+#+begin_src haskell
+fmap :: (a -> b) -> Maybe a -> Maybe b
+#+end_src
+
+Now what if we wanted to make the tuple an instance of =Functor= in such a way that when we =fmap= a function over a tuple, it gets applied to hte first component of the tuple?
+That way. doing =fmap (+3) (1,1)= would result in =(4,1)=.
+It turns out that writing the instance for that is kind of hard.
+With =Maybe=, we just say =instance Functor Maybe where= because only type constructors that take exactly one parameter can be made an instance of =Functor=.
+But it seems like there's no way to do something like that with =(a,b)= so that the type parameter =a= ends up being the one that changes when we use =fmap=.
+To get around this, we can /newtype/ our tuple in such a way that the secont type parameter represents the type of the first component in the tuple:
+#+begin_src haskell
+  newtype Pair b a = Pair { getPair :: (a,b) }
+#+end_src
+
+And now we can make it an instance of =Functor= so that the function is mapped over the first component:
+#+begin_src haskell
+  instance Functor (Pair c) where
+    fmap f (Pair (x,y)) = Pair (f x, y)
+#+end_src
+
+As you can see, we can pattern match on types defined with /newtype/.
+We pattern match to get the underlying tuple, the we a pply the function =f= to the first component in the tuple and then we use the =Pair= value constructor to convert the tuple back to our =Pair b a=.
+
+So now if we convert a tuple into a =Pair b a=, we can use =fmap= over it and the function will be mapped over the first component:
+#+begin_src haskell
+  getPair $ fmap (*100) (Pair (2,3))
+#+end_src
+
+** On newtype laziness
+
+We mentioned that /newtype/ is usually faster that /data/.
+The only thing that can be done with /newtype/ is turning an existing type into a new type, so internally, Haskell can represent the values of types defined with /newtype/ just like the original one, only it has to keep in mind that the their types are now distinct.
+This fact means that not only is /newtype/ faster, it's alto lazier.
+
+Like we've said before, Haskell is lazy by default, which means that only when we try to actually print the results of our functions will any computation take place.
+
+Now, consider the following type:
+#+begin_src haskell
+data CoolBool = CoolBool { getCoolBool :: Bool }
+#+end_src
+
+#+RESULTS:
+
+It's your run-of-the-millalgebraic data type that was defined with the /data/ keyword.
+It has one value constructor, which has one field whose type is =Bool=.
+Let's make a function that pattern matches on a =CoolBool= and returns the value ="hello"= regardless of whether the =Bool= inside the =CoolBool= was =True= of =False=:
+#+begin_src haskell
+  helloMe :: CoolBool -> String
+  helloMe (CoolBool _) = "hello"
+#+end_src
+
+#+RESULTS:
+: <interactive>:3:10-17: error:
+:     Not in scope: data constructor ‘CoolBool’
+
+Instead of applying this function to a normal =CoolBool=, let's throw it a curveball and apply it to =undefined=
+#+begin_src haskell
+helloMe undefined
+#+end_src
+
+#+RESULTS:
+: "*** Exception: Prelude.undefined
+: CallStack (from HasCallStack):
+:   error, called at libraries/base/GHC/Err.hs:79:14 in base:GHC.Err
+:   undefined, called at <interactive>:10:9 in interactive:Ghci6
+
+Yikes, an exception!
+Now why did this exception happen? Types defined with the /data/ keyword can have multiple value constructors (even though =CoolBool= only has one).
+So in order to see if the value given to our function conforms to the =(CoolBool _)= pattern, Haskell has to evaluate the value just enough to see which value constructor was used when we made the value.
+And when we try to evaluate an =undefined= value, even a little, an exception is thrown.
+
+Instead of using the /data/ keyword for =CoolBool=, let's try using /newtype/:
+#+begin_src haskell
+newtype CoolBool = CoolBool { getCoolBool :: Bool }
+#+end_src
+
+#+RESULTS:
+
+And let's apply =helloMe= to an =undefined= value:
+#+begin_src haskell
+helloMe undefined
+#+end_src
+
+#+RESULTS:
+: hello
+
+It worked!
+When we use /newtype/, Haskell can internally represent the values of the new type in the same way as the original values.
+It doesn't have to add another box around them, it just has to be aware of the values being of different types.
+And because Haskell knows that types made with the /newtype/ keyword can only have one constructor, it doesn't havi to evaluate the value passed to the function to make sure that it conforms to the =(CoolBool _)= pattern because /newtype/ types can only have one possible value constructor and one field.
+
+*Whereas /data/ can be used do make your own types from scratch, /newtype/ is for making a completely new type out of an existing type.*
