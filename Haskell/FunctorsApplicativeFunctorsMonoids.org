@@ -311,3 +311,61 @@ It doesn't have to add another box around them, it just has to be aware of the v
 And because Haskell knows that types made with the /newtype/ keyword can only have one constructor, it doesn't havi to evaluate the value passed to the function to make sure that it conforms to the =(CoolBool _)= pattern because /newtype/ types can only have one possible value constructor and one field.
 
 *Whereas /data/ can be used do make your own types from scratch, /newtype/ is for making a completely new type out of an existing type.*
+
+* Monoids
+Consider the following: =*= is a function that takes two numbers and multiplies them.
+If we multiply some number with a =1=, the result is always equal to that number.
+It doesn't matter if we do =1 * x= or =x * 1=, the result is always =x=.
+Simirlaly, =++= is also a function which takes two things and returns a third, only instead of multiplying numbers, it takes two lists and concatenates them.
+And much like =*=, it also has a certain value which doesn't change the other one when used with =++=, that values is an empty list: =[]=.
+
+There's another thing that these two operations have in common that may not be as abvious as our previous observations:
+when we have three or more values and we want to use the binary function to reduce them to a single result, the order in which we apply the binary function to the values doesn't matter.
+It doesn't matter if we do =(3 * 4) * 5= or =3 * (4 * 5)=, The result is =60=.
+The same goes for =++=.
+
+We call thir property /associativity/. =*= is associative, and so is =++=, but =-=, for example, is not.
+
+By noticing and writing down there properties, we have changed upon /monoids/!
+A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function.
+When something acts as an identity with respect to a functino, it means that when called with that functino and some other values, the result is always equal to that other value.
+=1= is the identity with respect to =*= and =[]= is the identity with respect to =++=.
+Which is why the =Monoid= type class exists, it's for types which can act like monoids.
+Let's see how the type class is defined:
+
+#+begin_src haskell
+  class Monoid m where
+    mempty :: m
+    mappend :: m -> m -> m
+    mconcat :: [m] -> m
+    mconcat = foldr mappend mempty
+#+end_src
+
+First of all, we see that only concrete types can be made instances of =Monoid=, because the =m= in the type class definition doesn't take any type parameters.
+This is different from =Functor= and =Applicative=, which rewuire their instances to be type constructors which take one parameter.
+
+The first function is =mempty=, it's not really a function, since it doesn't take parameters, so it's a polymorphic contant, kind of like =minBound= from =Bounded=.
+=mempty= represents the identity value for a particular monoid.
+
+Next up, we have =mappend=, which is the binary function.
+It takes two values of the same type and returns a values of that type as well.
+It's worth noting that the decision to name =mappend= as it's named was kind of unfortunate, because it implies that we're appenting two things in some way.
+While =+= does take two lists and appent one to the other, =*= doesn't reappy do any appending, it just multiplies two numbers together.
+
+The last function is this type class definition is =mconcat=.
+It takes a list of monoid values and reduces them to a single values by doing =mappend= between the list's elements.
+It has a default implementation, which just takes =mempty= as a stating values and folds the list from the rigth with =mappend=.
+Because the default implementation is fine for most instances, we won't concern ourselves with =mconcat= too much from now on.
+When making a type an instance of =Monoid=, it suffices to just implement =mempty= and =mappend=.
+The reason =mconcat= is there at all is because for some instances, there might be a more efficient way to implement =mconcat=, but for most instances the default implementation is just fine.
+
+We mentioned that there has to be a value that acts as the identity with respect to the binary function that the binasy function has to be associative.
+It's possible to make instances off =Monoid= that don't follow there rules, but such instances are of no use to anyone because when using the =Monoid= type class, we rely on its instances acting like monoids.
+Otherwise, what's the point? That's why when making instances, we havi to make sure they follow these laws:
+
+- ~mempty `mappend` x = x~
+- ~x `mappend` mempty = x~
+- ~(x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)~
+
+Haskell doesn't enforce there laws, so we as the programmer have to be careful that our instances do indeed obey them.
+
