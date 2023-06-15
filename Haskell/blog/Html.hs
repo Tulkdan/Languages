@@ -8,7 +8,6 @@ module Html
   , body_
   , head_
   , title_
-  , append_
   , render
   )
   where

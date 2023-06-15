@@ -8,6 +8,9 @@ newtype Structure = Structure String
 
 type Title = String
 
+instance Semigroup Structure where
+  (<>) c1 c2 = Structure (getStructuredString c1 <> getStructuredString c2)
+
 -- * EDSL
 
 html_ :: Title -> Structure -> Html
@@ -30,10 +33,6 @@ p_ = Structure . el "p" . escape
 
 h1_ :: String -> Structure
 h1_ = Structure . el "h1" . escape
-
-append_ :: Structure -> Structure -> Structure
-append_ c1 c2 = Structure (getStructuredString c1 ++ getStructuredString c2)
-
 
 ul_ :: [Structure] -> Structure
 ul_ = list "ul"
