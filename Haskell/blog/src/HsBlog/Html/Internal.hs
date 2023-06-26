@@ -1,4 +1,6 @@
-module Html.Internal where
+module HsBlog.Html.Internal where
+
+import Numeric.Natural
 
 -- * Types
 
@@ -10,6 +12,14 @@ type Title = String
 
 instance Semigroup Structure where
   (<>) c1 c2 = Structure (getStructuredString c1 <> getStructuredString c2)
+
+instance Monoid Structure where
+  mempty = empty_
+
+  mconcat list =
+    case list of
+      [] -> mempty
+      x : xs -> x <> mconcat xs
 
 -- * EDSL
 
@@ -31,6 +41,9 @@ title_ = Structure . el "title"
 p_ :: String -> Structure
 p_ = Structure . el "p" . escape
 
+h_ :: Natural -> String -> Structure
+h_ level = Structure . el ("h" ++ show level) . escape
+
 h1_ :: String -> Structure
 h1_ = Structure . el "h1" . escape
 
@@ -42,6 +55,9 @@ ol_ = list "ol"
 
 code_ :: String -> Structure
 code_ = Structure . el "pre" . escape
+
+empty_ :: Structure
+empty_ = Structure ""
 
 -- * Render
 
