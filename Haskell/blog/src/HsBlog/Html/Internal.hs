@@ -8,18 +8,9 @@ newtype Html = Html String
 
 newtype Structure = Structure String
 
+newtype Content = Content String 
+
 type Title = String
-
-instance Semigroup Structure where
-  (<>) c1 c2 = Structure (getStructuredString c1 <> getStructuredString c2)
-
-instance Monoid Structure where
-  mempty = empty_
-
-  mconcat list =
-    case list of
-      [] -> mempty
-      x : xs -> x <> mconcat xs
 
 -- * EDSL
 
@@ -28,6 +19,8 @@ html_ title content = Html
   $ el "html"
     $ el "head"
     $ (el "title" $ escape title) ++ el "body" (getStructuredString content)
+
+-- * Structure
 
 body_ :: String -> Structure
 body_ = Structure . el "body"
@@ -56,8 +49,41 @@ ol_ = list "ol"
 code_ :: String -> Structure
 code_ = Structure . el "pre" . escape
 
-empty_ :: Structure
-empty_ = Structure ""
+instance Semigroup Structure where
+  (<>) c1 c2 = Structure (getStructuredString c1 <> getStructuredString c2)
+
+instance Monoid Structure where
+  mempty = Structure ""_
+  mconcat list =
+    case list of
+      [] -> mempty
+      x : xs -> x <> mconcat xs
+
+-- * Content
+
+txt_ :: String -> Content
+txt_ = Content . escape
+
+link_ :: FilePath -> Content -> Content
+link_ path content = Content
+  $ elAttr "a"
+    ("href=\"" ++ escape path ++ "\"")
+    (getContentString content)
+
+img_ :: FilePath -> Content
+img_ path = Content $ "<img src=\"" ++ escape path ++ "\">"
+
+b_ :: Content -> Content
+b_ = Content . el "b" . getContentString
+
+i_ :: Content -> Content
+i_ = Content . el "i" . getContentString
+
+instance Semigroup Content where
+  (<>) c1 c2 = Content (getContentString c1 <> getContentString c2)
+
+instance Monoid Content where
+  mempty = Content ""
 
 -- * Render
 
@@ -72,10 +98,19 @@ el :: String -> String -> String
 el tag content =
   "<" ++ tag ++ ">" ++ content ++ "</" ++ tag ++ ">"
 
+elAttr :: String -> String -> String -> String
+elAttr tag attrs content =
+  "<" ++ tag ++ " " ++ attrs ++ ">" ++ content ++ "</" ++ tag ++ ">"
+
 getStructuredString :: Structure -> String
 getStructuredString content = 
   case content of
     Structure str -> str
+
+getContentString :: Content -> String
+getContentString content =
+  case content of
+    Content str -> str
 
 escape :: String -> String
 escape =

@@ -12,7 +12,12 @@ module HsBlog.Html
   , head_
   , title_
   , code_
-  , empty_
+  , Content
+  , txt_
+  , img_
+  , link_
+  , b_
+  , i_
   , render
   )
   where
