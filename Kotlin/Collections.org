@@ -1,0 +1,224 @@
+* Collections
+
+Kotlin has the following collections for grouping items:
+
+| Collection type | Description                                                             |
+|-----------------+-------------------------------------------------------------------------|
+| Lists           | Ordered collections of items                                            |
+| Sets            | Unique unordered collections of items                                   |
+| Maps            | Sets of key-value pairs where keys are unique and map to only one value |
+
+** List
+
+To create a read-only list use the =listOf()= function.
+
+#+begin_src kotlin
+  val readOnlyShapes = listOf("triangle", "square", "circle")
+  println(readOnlyShapes)
+#+end_src
+
+#+RESULTS:
+: [triangle, square, circle]
+
+To create a mutable list use the =mutableListOf()= function.
+
+#+begin_src kotlin
+  val shapes: MutableList<String> = mutableListOf("triangle", "square", "circle")
+  println(shapes)
+#+end_src
+
+#+RESULTS:
+: [triangle, square, circle]
+
+You can obtain read-only views of mutable lists by assigning them to a =List=:
+
+#+begin_src kotlin
+  val shapes2: MutableList<String> = mutableListOf("triangle")
+  val shapes2Locked: List<String> = shapes2
+  println(shapes2Locked)
+#+end_src
+
+#+RESULTS:
+: [triangle]
+
+Lists are ordered so to access an item in a list use the indexed access operator =[]=
+
+#+begin_src kotlin
+  println("The first item in the list is: ${readOnlyShapes[0]}")
+#+end_src
+
+#+RESULTS:
+: The first item in the list is: triangle
+
+Or you can get the first using the =.first()= extension:
+
+#+begin_src kotlin
+  println("The first item in the list is: ${readOnlyShapes.first()}")
+#+end_src
+
+#+RESULTS:
+: The first item in the list is: triangle
+
+There's also the =.last()= extension to get the last item of a List:
+
+#+begin_src kotlin
+  println("The last item in the list is: ${readOnlyShapes.last()}")
+#+end_src
+
+#+RESULTS:
+: The last item in the list is: circle
+
+To get the number of items in a list, use =.count()= extension
+
+#+begin_src kotlin
+  println("The list has ${readOnlyShapes.count()} items")
+#+end_src
+
+#+RESULTS:
+: The list has 3 items
+
+To check that an item is in a list, use =in= operator
+
+#+begin_src kotlin
+  println("circle" in readOnlyShapes)
+#+end_src
+
+#+RESULTS:
+: true
+
+To add or remove items from a mutable list, use =.add()= and =.remove()= functions
+
+#+begin_src kotlin
+  shapes.add("pentagon")
+  println(shapes)
+
+  shapes.remove("pentagon")
+  println(shapes)
+#+end_src
+
+#+RESULTS:
+: [triangle, square, circle, pentagon]
+: [triangle, square, circle]
+
+** Set
+
+Whereas lists are ordered and allow duplicate items, sets are *unordered* and only store *unique* items.
+
+To create a read-only set, use the =setOf()= function.
+
+#+begin_src kotlin
+  val readOnlyFruit = setOf("apple", "banana", "cherry")
+#+end_src
+
+#+RESULTS:
+
+To create a mutable set, use the =mutableSetOf()= function.
+
+#+begin_src kotlin
+  val fruit: MutableSet<String> = mutableSetOf("apple", "banana", "cherry")
+#+end_src
+
+#+RESULTS:
+
+As sets are *unordered*, you can't access an item at a particular index.
+
+To get the number of items, use the =.count()= function
+
+#+begin_src kotlin
+  println("This set has ${readOnlyFruit.count()} items")
+#+end_src
+
+#+RESULTS:
+: This set has 3 items
+
+To check that an item is in a set, use the =in= operator
+
+#+begin_src kotlin
+  println("banana" in readOnlyFruit)
+#+end_src
+
+#+RESULTS:
+: true
+
+To add or remove items from a mutable set, use =.add()= and =.remove()= functions
+
+#+begin_src kotlin
+  fruit.add("dragonfruit")
+  println(fruit)
+
+  fruit.remove("dragonfruit")
+  println(fruit)
+#+end_src
+
+#+RESULTS:
+: [apple, banana, cherry, dragonfruit]
+: [apple, banana, cherry]
+
+** Map
+
+Maps store items as key-value pairs.
+
+To creat a read-only map, use the =mapOf()= function
+
+#+begin_src kotlin
+  val readOnlyMenu = mapOf(
+      "apple" to 100,
+      "kiwi" to 100,
+      "orange" to 200
+  )
+#+end_src
+
+#+RESULTS:
+
+To creat a mutable map, use the =mutableMapOf()= function
+
+#+begin_src kotlin
+  val menu: MutableMap<String, Int> = mutableMapOf(
+      "apple" to 100,
+      "kiwi" to 100,
+      "orange" to 200
+  )
+#+end_src
+
+#+RESULTS:
+
+To access a value in a map, use the indexed access operator =[]= with its key
+
+#+begin_src kotlin
+  println("The value of apple juice is: ${readOnlyMenu["apple"]}")
+#+end_src
+
+#+RESULTS:
+: The value of apple juice is: 100
+
+To get the number of items in a map, use the =.count()= function
+
+#+begin_src kotlin
+  println("This map has ${readOnlyMenu.count()} key-value pairs")
+#+end_src
+
+#+RESULTS:
+: This map has 3 key-value pairs
+
+To add or remove items from a mutable map, use =.put()= and =.remove()= functions
+
+#+begin_src kotlin
+  menu.put("coconut", 150)
+  println(menu)
+
+  menu.remove("orange")
+  println(menu)
+#+end_src
+
+#+RESULTS:
+: {apple=100, kiwi=100, orange=200, coconut=150}
+: {apple=100, kiwi=100, coconut=150}
+
+To check if a specific key is already included in a map, use the =.containsKey()= function
+
+#+begin_src kotlin
+  println(readOnlyMenu.containsKey("kiwi"))
+#+end_src
+
+#+RESULTS:
+: true
