@@ -1,0 +1,85 @@
+* Control Flow
+
+** Conditional expressions
+
+Kotlin provides =if= and =when= for checking conditional expressions
+
+*** When
+
+Use =when= when you have a conditional expressions with multiple branches.
+=when= can be used either as a statement or as an expression.
+
+Heres how to use:
+
++ Place the conditional expression within parentheses =()= and the actions to take within curly braces ={}=
++ Use =->= in each branch to separate each condition from each action
+
+  #+begin_src kotlin
+  val obj = "Hello"
+
+  when (obj) {
+      "1" -> println("One")
+      "Hello" -> println("Greeting")
+      else -> println("Unknown")
+  }
+  #+end_src
+
+#+RESULTS:
+: Greeting
+
+Here's an example of using =when= as an expression, the syntax is assigned immediately to a variable:
+
+#+begin_src kotlin
+  val result = when (obj) {
+      "1" -> "One"
+      "Hello" -> "Greeting"
+      else -> "Unknown"
+  }
+
+  println(result)
+#+end_src
+
+#+RESULTS:
+: Greeting
+
+If =when= is used as an expression, the else branch is mandatory, unless the compiler can detect
+that all possible cases are covered by the branch conditions.
+
+The previous example showed that =when= is useful for matching a variable.
+=when= is also useful when you need to check a chain of Boolean expressions
+
+#+begin_src kotlin
+  val temp = 18
+
+  val description = when {
+      temp < 0 -> "very cold"
+      temp < 10 -> "a bit cold"
+      temp < 20 -> "warm"
+      else -> "hot"
+  }
+
+  println(description)
+#+end_src
+
+#+RESULTS:
+: warm
+
+
+** Ranges
+
+The most commom way to create a range in Kotlin is to use the =..= operator.
+For example, =1..4= is equivalent to =1, 2, 3, 4=.
+
+To declare a range that doesn't include the end value, use the =..<= operator.
+For example, =1..<4= is equivalent to =1, 2, 3=.
+
+To declare a range in reverse order, use =downTo=.
+For example, =4 downTo 1= is equivalent to =4, 3, 2, 1=.
+
+To declare a range that increments in a step, use =step= and the desired increment value.
+For example, =1..5 step 2= is equivalent to =1, 3, 5=.
+
+You can also do the same with =Char= ranges:
+
++ ='a'..'d'= = ='a', 'b', 'c', 'd'=
++ ='z' downTo 's' step 2= = ='z', 'x', 'v', 't'=
