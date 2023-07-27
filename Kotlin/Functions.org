@@ -1,0 +1,48 @@
+* Functions
+
+To make your code more concise, you can use single-expression functions.
+For example, the =sum()= function can be shortened
+
+#+begin_src kotlin
+  fun sum(x: Int, y: Int): Int {
+      return x + y
+  }
+
+  println(sum(1,2))
+#+end_src
+
+#+RESULTS:
+: 3
+
+#+begin_src kotlin
+  fun sum2(x: Int, y: Int) = x + y
+
+  println(sum2(1,2))
+#+end_src
+
+#+RESULTS:
+: 3
+
+** Lambda expressions
+
+You can even write lambda expressions in kotlin
+
+#+begin_src kotlin
+  fun uppercaseString(string: String): String {
+      return string.uppercase()
+  }
+
+  println(uppercaseString("hello"))
+#+end_src
+
+#+RESULTS:
+: HELLO
+
+Can also be written to:
+
+#+begin_src kotlin
+  println({ string: String -> string.uppercase() }("hello"))
+#+end_src
+
+#+RESULTS:
+: HELLO
