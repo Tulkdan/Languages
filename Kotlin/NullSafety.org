@@ -1,0 +1,59 @@
+* Null Safety
+
+In kotlin it's impossible to have a =null= value.
+To help prevent issues with =null= values in your programs, Kotlin has null safety in place.
+Null safety detects potential problems with =null= values at compile time, rather that at run time.
+
+** Nullable types
+
+Kotlin supports nullable types which allows the possibility for the declared type to have =null= values.
+By default, a type is *not* allowed to accept =null= values.
+Nullable types are declared by explicitly adding =?= after the type declaration.
+
+Example
+
+#+begin_src kotlin
+  fun main() {
+      var neverNull: String = "This can't be null"
+
+      // Throws compiler error
+      neverNull = null
+
+      var nullable: String? = "you can keep a null here"
+
+      nullable = null
+  }
+#+end_src
+
+** Check for null values
+
+You can check for the presence of =null= values within conditionals expressions.
+In the following example, the =describeString()= function has an =if= statement that checks whether =maybeString= is *not* =null= and if its =length= is greater than zero
+
+#+begin_src kotlin
+  fun describeString(maybeString: String?): String {
+      if (maybeString != null && maybeString.length > 0) {
+	  return "String of length ${maybeString.length}"
+      } else {
+	  return "Empty or null string"
+      }
+  }
+
+  var nullString: String? = null
+  println(describeString(nullString))
+#+end_src
+
+#+RESULTS:
+: Empty or null string
+
+** Elvis operator
+
+You can provide a default value to return if a =null= value is detected by using the *Elvis operator* =?:=
+
+#+begin_src kotlin
+  var nullString: String? = null
+  println(nullString?.length ?: 0)
+#+end_src
+
+#+RESULTS:
+: 0
