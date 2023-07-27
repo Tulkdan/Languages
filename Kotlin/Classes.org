@@ -1,0 +1,51 @@
+* Data classes
+
+Kotlin has *data classes* which have the same functionality as classes,
+but they come automatically with addtional member functions.
+These members functions allow you to easily print the instance to readable output,
+compare instances of a class, copy instances and more.
+
+To declare a data class, use the keyword =data=:
+
+#+begin_src kotlin
+  data class User(val name: String, val id: Int)
+#+end_src
+
+The most useful predefined member functions of data classes are:
+
+| Function      | Description                                                                             |
+|---------------+-----------------------------------------------------------------------------------------|
+| =.toString()= | Prints a readable string of the class instance and its properties                       |
+| =.equals()=   | Compares instances of a class                                                           |
+| =.copy()=     | Creates a class instance by copying another, potentially with some different properties |
+
+#+begin_src kotlin
+  import kotlin.random.Random
+
+  data class Employee(val name: String, var salary: Int)
+
+  class RandomEmployeeGenerator(var minSalary: Int, var maxSalary: Int) {
+      val names = listOf("John", "Mary", "Ann", "Paul", "Jack", "Elizabeth")
+
+      fun generateEmployee(): Employee {
+	  val name = names.random()
+	  val salary = Random.nextInt(from = minSalary, until = maxSalary)
+
+	  return Employee(name, salary)
+      }
+  }
+
+  val empGen = RandomEmployeeGenerator(10, 30)
+  println(empGen.generateEmployee())
+  println(empGen.generateEmployee())
+  println(empGen.generateEmployee())
+  empGen.minSalary = 50
+  empGen.maxSalary = 100
+  println(empGen.generateEmployee())
+#+end_src
+
+#+RESULTS:
+: Employee(name=Paul, salary=12)
+: Employee(name=John, salary=22)
+: Employee(name=Ann, salary=13)
+: Employee(name=Jack, salary=74)
