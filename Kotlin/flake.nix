@@ -21,7 +21,10 @@
     {
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ kotlin ];
+          packages = with pkgs; [
+            kotlin
+            kotlin-language-server
+          ];
         };
       });
     };
