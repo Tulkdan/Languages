@@ -28,18 +28,20 @@ fun main(args: Array<String>) {
 
     val points = createPoints()
 
-    val myPoints = lines.fold(0) { acc, line -> run {
-	val halfIdx = line.count() / 2
-	val firstHalf = line.substring(0, halfIdx).toList()
-	val secondHalf = line.substring(halfIdx).toList()
+    var myPoints = 0
 
-	val duplicate = firstHalf.intersect(secondHalf)
+    for (i in 0..(lines.count() - 1) step 3) {
+	val first = lines.get(i).toList()
+	val second = lines.get(i+1).toList()
+	val third = lines.get(i+2).toList()
+
+	val duplicate = first.intersect(second).intersect(third)
 
 	val letter = duplicate.first()
 	val value = points.get(letter) ?: 0
 
-	acc + value
-    } }
+	myPoints += value
+    }
 
     println(myPoints)
 }
