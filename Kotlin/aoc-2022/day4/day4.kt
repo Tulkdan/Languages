@@ -26,10 +26,10 @@ fun main(args: Array<String>) {
 
 	println("${first.first()} <= ${second.first()} && ${first.last()} >= ${second.last()}")
 
-	if (first.first() <= second.first() && first.last() >= second.last()) {
+	if (first.first() <= second.first() && first.last() >= second.first()) {
 	    // first contains second
 	    acc + 1
-	} else if (first.first() >= second.first() && first.last() <= second.last()) {
+	} else if (first.first() >= second.first() && first.first() <= second.last()) {
 	    // second contains
 	    acc + 1
 	} else acc
