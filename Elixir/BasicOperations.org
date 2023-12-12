@@ -1,0 +1,276 @@
+** Integers
+
+#+begin_src elixir
+255
+#+end_src
+
+#+RESULTS:
+: 255
+
+Support for binary:
+#+begin_src elixir
+0b0110
+#+end_src
+
+#+RESULTS:
+: 6
+
+For octal:
+#+begin_src elixir
+0o644
+#+end_src
+
+#+RESULTS:
+: 420
+
+And hexadecimal numbers built in:
+#+begin_src elixir
+0x1f
+#+end_src
+
+#+RESULTS:
+: 31
+
+** Floats
+Floating points numbers require a decimal after at least one digit;
+they have 64-bit double precision and support =e= for exponent values:
+
+#+begin_src elixir
+3.14
+#+end_src
+
+#+RESULTS:
+: 3.14
+
+#+begin_src elixir
+.14
+#+end_src
+
+#+RESULTS:
+: ** (SyntaxError) /tmp/babel-IWSmfn/elixir-iPEXjm:1:1: syntax error before: '.'
+:     |
+:   1 | .14
+:     | ^
+:     (iex 1.15.7) expanding macro: IEx.Helpers.import_file/1
+:     iex:18: (file)
+
+#+begin_src elixir
+1.0e-10
+#+end_src
+
+#+RESULTS:
+: 1.0e-10
+
+** Atoms
+Atom is a constant whose name is its value.
+They are similar as Symbols in JS:
+
+#+begin_src elixir
+:foo == :bar
+#+end_src
+
+#+RESULTS:
+: false
+
+The booleans =true= and =false= are also the atoms =:true= and =:false=
+#+begin_src elixir
+is_atom(true)
+#+end_src
+
+#+RESULTS:
+: true
+
+#+begin_src elixir
+:true == true
+#+end_src
+
+#+RESULTS:
+: true
+
+Names of modules in Elixir are also atoms.
+=MyApp.MyModule= is a valid atom, even if no such module has been declared yet.
+
+#+begin_src elixir
+is_atom(MyApp.MyModule)
+#+end_src
+
+#+RESULTS:
+: true
+
+** Lists
+Lists are simple collections of values which may includee multiple types
+
+#+begin_src elixir
+[3.14, :pie, "Apple"]
+#+end_src
+
+#+RESULTS:
+: [3.14, :pie, "Apple"]
+
+Elixir implements list collections as linked lists.
+This means that accessing tthe list length is an operation that will run in linear time (=O(n)=).
+For this reason, it's faster to preprend that to appent:
+
+#+begin_src elixir
+list = [3.14, :pie, "Apple"]
+
+[4 | list]
+#+end_src
+
+#+RESULTS:
+: [4, 3.14, :pie, "Apple"]
+
+*** List Concatenation
+
+List concatenation uses the =++/2= operator:
+
+#+begin_src elixir
+[1, 2] ++ [3, 4, 1]
+#+end_src
+
+#+RESULTS:
+: [1, 2, 3, 4, 1]
+
+In Elixir and Erlang, a function or operator name has two components:
+the name you give it (here =++=) and its /arity/.
+Arity and the given name are combined with a slash.
+
+*** List Substraction
+Support for substraction is provided via the =--/2= operator:
+
+#+begin_src elixir
+["foo", :bar, 42] -- [42, "bar"]
+#+end_src
+
+#+RESULTS:
+: ["foo", :bar]
+
+*Note*: list substraction uses strict comparison to match the values
+
+#+begin_src elixir
+[2] -- [2.0]
+#+end_src
+
+#+RESULTS:
+: [2]
+
+*** Head / Tail
+When using lists, it is common to work with a list's head and tail.
+Elixir provides two helpful functions, =hd= and =tl=, for working with these parts:
+
+#+begin_src elixir
+hd [3.14, :pie, "Apple"]
+#+end_src
+
+#+RESULTS:
+: 3.14
+
+#+begin_src elixir
+tl [3.14, :pie, "Apple"]
+#+end_src
+
+#+RESULTS:
+: [:pie, "Apple"]
+
+In addition to the aforementioned functions, you can use pattern matching and the cons operator =|= to split a list into head and tail.
+
+#+begin_src elixir
+[head | tail] = [3.14, :pie, "Apple"]
+
+head
+#+end_src
+
+#+RESULTS:
+: 3.14
+
+** Tuples 
+Tuples are similar to lists, but are stored contiguously in memory.
+Making it accessing their length fast but modification expensive.
+
+#+begin_src elixir
+{3.14, :pie, "Apple"}
+#+end_src
+
+#+RESULTS:
+: {3.14, :pie, "Apple"}
+
+** Keyword lists
+Keyword lists and maps are the associative collections of Elixir.
+In Elixir, a keyword list is a special list of two-element tuples whose first element is an atom;
+they share performance with lists:
+
+#+begin_src elixir
+[foo: "bar", hello: "world"]
+#+end_src
+
+#+RESULTS:
+: [foo: "bar", hello: "world"]
+
+#+begin_src elixir
+[{:foo, "bar"}, {:hello, "world"}]
+#+end_src
+
+#+RESULTS:
+: [foo: "bar", hello: "world"]
+
+The three characteristics of keyword lists highlight their importance:
+- Keys are atoms
+- Keys are ordered
+- Keys do not have to be unique
+
+For there reasons, keyword lists are most commonly used to pass options to functions
+
+** Maps
+Unlike keyword lists, they allow keys of any type and are un-ordered.
+You can define a map with the =%{}= syntax:
+#+begin_src elixir
+map = %{:foo => "bar", "hello" => :world}
+
+map[:foo]
+#+end_src
+
+#+RESULTS:
+: "bar"
+
+Variables are allowed as map keys:
+#+begin_src elixir
+key = "hello"
+
+%{key => "world"}
+#+end_src
+
+#+RESULTS:
+: %{"hello" => "world"}
+
+For a map with only atoms, there's a special syntax to access it's values:
+#+begin_src elixir
+map2 = %{foo: "bar", hello: "world"}
+
+map2.hello
+#+end_src
+
+#+RESULTS:
+: "world"
+
+Maps also provide their own syntax for updates (this creates a new map):
+#+begin_src elixir
+map = %{foo: "bar", hello: "world"}
+
+%{map | foo: "baz"}
+#+end_src
+
+#+RESULTS:
+: %{foo: "baz", hello: "world"}
+
+*Note*: this syntax only works for updating a key that already exists in the map!
+If the key does not exist, a =KeyError= will be raised
+
+To creat a new key, instead use =Map.put/3=
+#+begin_src elixir
+map = %{hello: "world"}
+
+Map.put(map, :foo, "baz")
+#+end_src
+
+#+RESULTS:
+: %{foo: "baz", hello: "world"}
