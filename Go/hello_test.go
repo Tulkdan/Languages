@@ -4,21 +4,24 @@ import "testing"
 
 func TestHello(t *testing.T) {
     t.Run("saying hello to people", func(t *testing.T) {
-	got := Hello("Pedro")
-	want := "Hello, Pedro"
+        got := Hello("Pedro")
+        want := "Hello, Pedro"
 
-	if got != want {
-	    t.Errorf("got %q want %q", got, want)
-	}
+        assertCorrectMessage(t, got, want)
     })
 
     t.Run("say 'Hello, world' when an empty string is supplied", func(t *testing.T) {
-	got := Hello("")
-	want := "Hello, world"
+        got := Hello("")
+        want := "Hello, world"
 
-	if got != want {
-	    t.Errorf("got %q want %q", got, want)
-	}
+        assertCorrectMessage(t, got, want)
     })
 }
 
+func assertCorrectMessage(t testing.TB, got, want string) {
+    // this tells the test suite this method is a helper
+    t.Helper()
+    if got != want {
+        t.Errorf("got %q want %q", got, want)
+    }
+}
