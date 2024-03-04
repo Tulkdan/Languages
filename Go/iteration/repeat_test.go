@@ -14,6 +14,24 @@ func TestRepeat(t *testing.T) {
             t.Errorf("expected %q but got %q", expected, repeated)
         }
     })
+
+    t.Run("should only repeat the first character of a string", func(t *testing.T) {
+        repeated := Repeat("first", 5)
+        expected := "fffff"
+
+        if repeated != expected {
+            t.Errorf("expected %q but got %q", expected, repeated)
+        }
+    })
+
+    t.Run("should trims string", func(t *testing.T) {
+        repeated := Repeat("  spaaaace  ", 2)
+        expected := "ss"
+
+        if repeated != expected {
+            t.Errorf("expected %q but got %q", expected, repeated)
+        }
+    })
 }
 
 func BenchmarkRepeat(b *testing.B) {
