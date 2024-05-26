@@ -1,0 +1,146 @@
+* Functions and Pattern Mathching
+
+Behind the scenes, functions are patter-matching the arguments that they're called with.
+Say we needed a function to accept a map but we're only interested in using a particular key.
+We can pattern-match the argument on the presences of that key like this:
+
+#+NAME: Greeter1
+#+begin_src elixir
+defmodule Greeter1 do
+  def hello(%{name:  person_name}) do
+    IO.puts "Hello, " <> person_name
+  end
+end
+#+end_src
+
+#+begin_src elixir
+fred = %{name: "Fred", age: "95", favorite_color: "Taupe"}
+
+Greeter1.hello(fred)
+#+end_src
+
+#+RESULTS:
+: Hello, Fred
+: :ok
+
+What happens when we call the function with a map that doesn't contain the =:name= key?
+
+#+begin_src elixir
+Greeter1.hello(%{age: "95", favorite_color: "Taupe"})
+#+end_src
+
+#+RESULTS:
+: ** (FunctionClauseError) no function clause matching in Greeter1.hello/1    
+:     
+:     The following arguments were given to Greeter1.hello/1:
+:     
+:         # 1
+:         %{age: "95", favorite_color: "Taupe"}
+:     
+:     iex:2: Greeter1.hello/1
+:     iex:2: (file)
+
+The reason for this behavior is that Elixir pattern-matches the arguments that a function is called with against the arity the function is defined with.
+
+In =Greeter1.hello/1=, the map we pass (=fred=) is evaluated against our argument (=%{name: person_name}=):
+
+#+begin_src elixir
+%{name: person_name} = ${name: "Fred", age: "95", favorite_color: "Taupe"}
+#+end_src
+
+It finds that there is a key that corresponds to =name= in the incoming map. We have a match!
+And as a result of this successful match, the value of the =:name= key in the map on the right (i.e. the =fred= map) is bound to the variable on the left (=person_name=).
+
+Now, what if we still wanted to assign Fred's name to =person_name= but we ALSO want to retain awareness of the entire person map?
+Let's say we want to =IO.inspect(fred)= after we greet him.
+At this point, because we only pattern-matched the =:name= key of our map, thus only binding the value of that key to a varaible, the function doen't have knowledge of the rest of Fred.
+
+In order to retain in, we need to assign that entire map to its own variable for us to be able to use it.
+
+Let's start a new function:
+#+begin_src elixir
+defmodule Greeter2 do
+  def hello(%{name: person_name} = person) do
+    IO.puts "Hello, " <> person_name
+    IO.inspect person
+  end
+end
+#+end_src
+
+#+RESULTS:
+: {:module, Greeter2,
+:  <<70, 79, 82, 49, 0, 0, 6, 168, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0, 218,
+:    0, 0, 0, 24, 15, 69, 108, 105, 120, 105, 114, 46, 71, 114, 101, 101, 116,
+:    101, 114, 50, 8, 95, 95, 105, 110, 102, 111, ...>>, {:hello, 1}}
+
+Remember that Elixir will pattern match the argument as it comes in.
+Therefore in this case, eacm side will pattern match against the incoming argument and bind to whatever it matches with.
+Let's take the right side first:
+
+#+begin_src elixir
+person = %{name: "Fred", age: "95", favorite_color: "Taupe"}
+#+end_src
+
+Now, =person= has been evaluated and bound to the entire fred-map.
+We move on to the next pattern-match:
+
+#+begin_src elixir
+%{name: person_name} = %{name: "Fred", age: "95", favorite_color: "Taupe"}
+#+end_src
+
+Now this is the same as our original =Greeter1= function where we pattern matched the map and only retained Fred's name.
+What we've achieved is two variables we can use instead of one:
+
+1. =person=, referring to =%{name: "Fred", age: "95", favorite_color: "Taupe"}=
+2. =person_name=, referring to ="Fred"=
+
+So now when we call =Greeter2.hello/1=, we can use all of Fred's information:
+
+#+begin_src elixir
+Greeter2.hello(fred)
+
+Greeter2.hello(%{name: "Fred"})
+#+end_src
+
+#+RESULTS:
+: Hello, Fred
+: %{age: "95", favorite_color: "Taupe", name: "Fred"}
+: Hello, Fred
+: %{name: "Fred"}
+
+So we've seen that Elixir pattern-matches ata multiple depths because each argument matches tha incoming data independently,
+leaving us with the variables to call them by inside our function.
+
+*Summary*: Functions pattern-match the data passed in to each of its arguments independentry.
+We can use this to bind values to separate variables within the function.
+* Default arguments
+
+If we want a default value for an argument we use the =argument \\ value= syntax:
+
+#+begin_src elixir
+defmodule Greeter do
+  def hello(names, language_code \\ "en")
+
+  def hello(names, language_code) when is_list(names) do
+    names = Enum.join(names, ", ")
+
+    hello(names, language_code)
+  end
+
+  def hello(name, language_code) when is_binary(name) do
+    phrase(language_code) <> name
+  end
+
+  defp phrase("en"), do: "Hello, "
+  defp phrase("es"), do: "Hola, "
+end
+
+Greeter.hello ["Sean", "Steve"]
+Greeter.hello ["Sean", "Steve"], "es"
+#+end_src
+
+#+RESULTS:
+: [33mwarning: [0mredefining module Greeter (current version defined in memory)
+:   iex:1: Greeter (module)
+: 
+: "Hola, Sean, Steve"

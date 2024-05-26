@@ -108,8 +108,8 @@ Lists are simple collections of values which may includee multiple types
 : [3.14, :pie, "Apple"]
 
 Elixir implements list collections as linked lists.
-This means that accessing tthe list length is an operation that will run in linear time (=O(n)=).
-For this reason, it's faster to preprend that to appent:
+This means that accessing the list length is an operation that will run in linear time (=O(n)=).
+For this reason, it's faster to prepend than to append:
 
 #+begin_src elixir
 list = [3.14, :pie, "Apple"]
