@@ -80,9 +80,16 @@ Let's serve this files with a running server
 ** Paused and Flowing Modes of readable streams
 
 - also referred as =pull= and =push= modes
-- all readable streams starts =paused=, only after the =read()= is that it changes to =flowing=
+- all readable streams starts =paused= but can be switched to flowing mode in one of the following ways
+  - adding a =data= event handler
+  - calling the =stream.resume()= method
+  - calling the =stream.pipe()= method to send the data to a Writable
+- the =Readable= can switch back to paused mode using one of the following
+  - if there are no pipe destinations, by calling the =stream.pause()= method
+  - if there are pipe destinations, by removing all pipe destinations. Multiple pipe destinations may be removed by calling the =stream.unpipe()= method
 - in flowing mode, data can be lost if no consumers are available
-- when consuming readable streams using =pipe=, we don't nedd to worry about this as it is managed automatically
+- when consuming readable streams using =pipe=, we don't need to worry about this as it is managed automatically
+- *important concept* :: a =Readable= will not generate data until a mechanism for either consuming or ignoring that data is provided. If the consuming mechanism is disabled or taken away, the =Readable= will attempt to stop generating the data.
 
 ** Implement Writable Stream
 
@@ -215,3 +222,48 @@ Let's serve this files with a running server
       .pipe(objectToString)
       .pipe(process.stdout)
 #+end_src
+
+** Async iterators
+
+- It's highly recommended to use async iterator when working with streams.
+- you can use async iterator when reading from readable streams
+- note that we had to use an async function because we wanted to return a Promise
+- it's important to keep in mind to not mix async function with =EventEmitter= because there is no way to catch a rejection when it is emitted withint an event handler
+
+#+begin_src js :tangle examples/stream/implement-async-iterators.mjs
+  import { createReadStream } from 'node:fs'
+
+  async function logChunks(readable) {
+      for await (const chunk of readable) {
+          console.log(chunk)
+      }
+  }
+
+  const readable = craeateReadStream('./big.file', { encoding: 'utf8' })
+
+  logChunks(readable)
+#+end_src
+
+** Creating readable streams from iterables
+
+- there's a =from= method to create Readable streams out of iterators
+
+#+begin_src js :tangle examples/stream/implement-readable-streams-from-iterables.mjs
+  import { Readable } from 'node:stream'
+
+  async function* generate() {
+      yield 'hello'
+      yield 'streams'
+  }
+
+  const readable = Readable.from(generate())
+
+  readable.on('data', chunk => {
+      console.log(chunk)
+  })
+#+end_src
+
+* References
+
+- [[https://www.freecodecamp.org/news/node-js-streams-everything-you-need-to-know-c9141306be93/][Node.js Streams: Everything you need to know]]
+- [[https://nodesource.com/blog/understanding-streams-in-nodejs/][Understanding Streams in Node.js]]
