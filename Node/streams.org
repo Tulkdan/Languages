@@ -4,6 +4,8 @@
 - data not available all at once
 - instance of =EventEmitter=
 - is usually consumed using =pipe=
+- using streams, it can potentially scale infinitely because th amount of memory used by the process stays constant
+- most programs written using streams will scale well with any input size
   
 ** Pratical
 Create a huge file
@@ -72,11 +74,21 @@ Let's serve this files with a running server
 
 - pipes the output of a stream into the input of the next
 - source has to be a readable stream and the destination has to be a writable
+- lacks error handling
+- it's better to use the =pump= library
   
 ** Stream events
 
 - streams can also be consumed with events
-
+- streams inherit from the =EventEmitter= class
+  - data :: emitted when new data is read from a readable stream
+  - end :: emitted whe na readable stream has no more data available and all the available data has been read
+  - finish :: emitted when a writable stream has been ended and all pending writes have been completed
+  - close :: loosely defined in the stream docs, close is usually emitted when the stream is fully closed
+  - error :: emitted when a stream has experienced an error
+  - paused :: emitted when a readable streams has been paused. Pausing will happen when either backpressure occurs or if the pause method is explicitly called
+  - resume :: emitted when a readable stream goes from being palsed to being resumed again
+  
 ** Paused and Flowing Modes of readable streams
 
 - also referred as =pull= and =push= modes
@@ -263,7 +275,13 @@ Let's serve this files with a running server
   })
 #+end_src
 
+** Backpressure
+
+- using =pipe= is safer than using =data= events and then writing go another stream directly, because it also handles backpressure for free
+- memory management capability where the amount of in-process memory is kept at a constant by holding data in the external pipeline
+
 * References
 
 - [[https://www.freecodecamp.org/news/node-js-streams-everything-you-need-to-know-c9141306be93/][Node.js Streams: Everything you need to know]]
 - [[https://nodesource.com/blog/understanding-streams-in-nodejs/][Understanding Streams in Node.js]]
+- [[https://www.packtpub.com/en-us/product/node-cookbook-9781838558758][Node Cookbook, 3rd Edition - Chapter 4 - Using streams]]
