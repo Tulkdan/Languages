@@ -1,0 +1,19 @@
+#+title:      Layered Architecture
+#+date:       [2024-10-14 Mon 23:33]
+#+filetags:   :architecture:
+#+identifier: 20241014T233359
+
+Separates the software in layers, called the presentation layer, business layers, persistent layers and database layer.
+
+Not a rule, but usually it can be only 3 layers, merging the persistent and database layers.
+
+It is usually the de factor go to.
+
+| Layer        | Responsability                                                |
+|--------------+---------------------------------------------------------------|
+| Presentation | handling all user interface and browser communication logic   |
+| business     | execute specific business rules associated with the request   |
+| persistent   | responsible to make the communication with the database layer |
+| database     | responsible to know how to get the data from DB               |
+
+Each layer in the architecture forms an abstraction around the work that needs to be tone to satisfy a particular buseness request
