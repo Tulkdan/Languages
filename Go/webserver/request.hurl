@@ -20,6 +20,25 @@ jsonpath "$.nickname" == "ana"
 jsonpath "$.birthdate" == "1985-09-23T00:00:00Z"
 jsonpath "$.stack" count == 0
 
-GET http://localhost:8000/contagem-pessoas
+POST http://localhost:8000/pessoas
+Content-Type: application/json
+{
+	"nickname" : "josé",
+	"name" : "José Roberto",
+	"birthdate": "2000-10-01T00:00:00Z",
+	"stack": ["C#", "Node", "Oracle"]
+}
 HTTP 200
-1
+[Captures]
+person_id: jsonpath "$.id"
+
+
+GET http://localhost:8000/pessoas/{{person_id}}
+HTTP 200
+[Asserts]
+header   "Content-Type" == "application/json"
+jsonpath "$.name" == "José Roberto"
+jsonpath "$.nickname" == "josé"
+jsonpath "$.birthdate" == "2000-10-01T00:00:00Z"
+jsonpath "$.stack" count == 3
+

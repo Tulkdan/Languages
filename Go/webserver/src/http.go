@@ -2,6 +2,7 @@ package src
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -11,11 +12,13 @@ var jsonContentType = "application/json"
 
 type httpServer struct {
 	People *People
+	db     *DB
 }
 
-func NewHTTPServer(addr string) *http.Server {
+func NewHTTPServer(addr string, db *DB) *http.Server {
 	server := &httpServer{
 		People: &People{},
+		db:     db,
 	}
 
 	r := &http.ServeMux{}
@@ -36,9 +39,10 @@ type IDDocument struct {
 func (h *httpServer) handleGet(w http.ResponseWriter, req *http.Request) {
 	id := req.PathValue("id")
 
-	person, err := h.People.Get(id)
+	person, err := h.People.Get(h.db, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Printf("Error getting person %s\n", err)
+		http.Error(w, ErrIDNotFound.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -54,12 +58,19 @@ func (h *httpServer) handlePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id := h.People.Insert(newPerson)
+	id, err := h.People.Insert(h.db, newPerson)
+	if err != nil {
+		fmt.Printf("Error insert person %s\n", err)
+		http.Error(w, "Error inserting person", http.StatusBadRequest)
+		return
+	}
+
 	res := IDDocument{Id: id}
 	w.Header().Set("Content-Type", jsonContentType)
 	json.NewEncoder(w).Encode(res)
 }
 
 func (h *httpServer) handleCount(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, strconv.Itoa(len(h.People.people)))
+	val, _ := h.db.CountAllPeople()
+	io.WriteString(w, strconv.Itoa(val))
 }
