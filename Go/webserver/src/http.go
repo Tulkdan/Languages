@@ -2,7 +2,9 @@ package src
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
+	"strconv"
 )
 
 var jsonContentType = "application/json"
@@ -19,6 +21,7 @@ func NewHTTPServer(addr string) *http.Server {
 	r := &http.ServeMux{}
 	r.HandleFunc("GET /pessoas/{id}", server.handleGet)
 	r.HandleFunc("POST /pessoas", server.handlePost)
+	r.HandleFunc("GET /contagem-pessoas", server.handleCount)
 
 	return &http.Server{
 		Addr:    addr,
@@ -28,15 +31,6 @@ func NewHTTPServer(addr string) *http.Server {
 
 type IDDocument struct {
 	Id string `json:"id"`
-}
-
-func (h *httpServer) handlePeople(w http.ResponseWriter, req *http.Request) {
-	switch req.Method {
-	case http.MethodGet:
-		h.handleGet(w, req)
-	case http.MethodPost:
-		h.handlePost(w, req)
-	}
 }
 
 func (h *httpServer) handleGet(w http.ResponseWriter, req *http.Request) {
@@ -64,4 +58,8 @@ func (h *httpServer) handlePost(w http.ResponseWriter, req *http.Request) {
 	res := IDDocument{Id: id}
 	w.Header().Set("Content-Type", jsonContentType)
 	json.NewEncoder(w).Encode(res)
+}
+
+func (h *httpServer) handleCount(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, strconv.Itoa(len(h.People.people)))
 }
