@@ -70,6 +70,37 @@ func (db *DB) GetPersonById(id string) (Person, error) {
 	return person, nil
 }
 
+func (db *DB) SearchPerson(param string) ([]Person, error) {
+	rows, err := db.connection.Query(`
+        SELECT
+            id,
+            name,
+            nickname,
+            birthdate,
+            stacks
+        FROM people
+        WHERE LOWER(name) LIKE '%' || ? || '%'
+            OR LOWER(nickname) LIKE '%' || ? || '%'
+            OR LOWER(stacks) LIKE '%' || ? || '%';`, param, param, param)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	people := []Person{}
+	for rows.Next() {
+		i := Person{}
+		if err = rows.Scan(&i.Id, &i.Name, &i.Nickname, &i.Birthdate, &i.Stack); err != nil {
+			return nil, err
+		}
+
+		people = append(people, i)
+	}
+
+	return people, nil
+}
+
 func (db *DB) CountAllPeople() (int, error) {
 	row := db.connection.QueryRow(`SELECT COUNT(*) FROM people;`)
 

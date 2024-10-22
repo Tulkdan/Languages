@@ -73,12 +73,19 @@ func (p *People) Insert(db *DB, person InsertPerson) (string, error) {
 	return id.String(), nil
 }
 
-var ErrIDNotFound = fmt.Errorf("ID not found")
-
 func (p *People) Get(db *DB, id string) (Person, error) {
 	d, err := db.GetPersonById(id)
 	if err != nil {
 		return Person{}, err
+	}
+
+	return d, nil
+}
+
+func (p *People) Search(db *DB, param string) ([]Person, error) {
+	d, err := db.SearchPerson(param)
+	if err != nil {
+		return nil, err
 	}
 
 	return d, nil

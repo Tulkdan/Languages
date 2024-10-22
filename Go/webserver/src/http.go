@@ -10,6 +10,12 @@ import (
 
 var jsonContentType = "application/json"
 
+// ERRORS
+var ErrIDNotFound = fmt.Errorf("ID not found")
+var ErrInsertPerson = fmt.Errorf("Error inserting person")
+var ErrQueryParamObrigatory = fmt.Errorf("Missing query param 't' in request")
+var ErrSearchPeople = fmt.Errorf("Failed to search for people")
+
 type httpServer struct {
 	People *People
 	db     *DB
@@ -24,6 +30,7 @@ func NewHTTPServer(addr string, db *DB) *http.Server {
 	r := &http.ServeMux{}
 	r.HandleFunc("GET /pessoas/{id}", server.handleGet)
 	r.HandleFunc("POST /pessoas", server.handlePost)
+	r.HandleFunc("GET /pessoas", server.handleSearch)
 	r.HandleFunc("GET /contagem-pessoas", server.handleCount)
 
 	return &http.Server{
@@ -61,7 +68,7 @@ func (h *httpServer) handlePost(w http.ResponseWriter, req *http.Request) {
 	id, err := h.People.Insert(h.db, newPerson)
 	if err != nil {
 		fmt.Printf("Error insert person %s\n", err)
-		http.Error(w, "Error inserting person", http.StatusBadRequest)
+		http.Error(w, ErrInsertPerson.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -73,4 +80,23 @@ func (h *httpServer) handlePost(w http.ResponseWriter, req *http.Request) {
 func (h *httpServer) handleCount(w http.ResponseWriter, req *http.Request) {
 	val, _ := h.db.CountAllPeople()
 	io.WriteString(w, strconv.Itoa(val))
+}
+
+func (h *httpServer) handleSearch(w http.ResponseWriter, req *http.Request) {
+	searchParam := req.URL.Query().Get("t")
+
+	if searchParam == "" {
+		http.Error(w, ErrQueryParamObrigatory.Error(), http.StatusBadRequest)
+		return
+	}
+
+	people, err := h.People.Search(h.db, searchParam)
+	if err != nil {
+		fmt.Printf("Error searching for people %s\n", err)
+		http.Error(w, ErrSearchPeople.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", jsonContentType)
+	json.NewEncoder(w).Encode(people)
 }
