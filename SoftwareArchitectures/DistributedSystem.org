@@ -1,0 +1,64 @@
+* ACID
+  Acronym that refers to:
+  - Atomicity :: entire statement is executed, or none of it is. Prevents data loss and corruption from ocurring
+  - Consistency :: ensures that changes are only made do tables predefined and predictable ways. Ensure that corruption or errors in your data do not create unintended consequences for the integrity of your table
+  - Isolation :: each transaction is treated as independent from any other. Ensure that multiple users can read and write asynchronously in the same database, without interference
+  - Durability :: ensure that changes to your data made by successfully executed transactions will be saved, even in the event of system failure
+* Distributed systems
+
+** Concurrency 
+*** Pessimistic concurrency control
+  most of the transactions will try to access the same resource simultaneously. Used to prevent cocurrent access to a shared resource and provide a system of acquiring a Lock on the data item. *Problem*: if a transaction acquires a lock on a resource so that no other transactions can access it, this might result in recuding concurrency of the overall system
+
+*** Optmistic concurrency control 
+  has an assumption that 0 or very few trnasactions will try to access a certain resource simultaneously, has 4 phases of operation:
+    - Read phase :: reads the data while also logging the timestamp at which data is read to verify for conflicts during the validation phase
+    - Execution phase :: executes all its operation like create, read, update or delete
+    - Validation phase :: before commiting the transaction, a validation check is performed to ensure consistency by checking the *last_updated* timestamp with the one recorded at *read_phase*. if the timestam matches, then the transaction will be allowed to be committed and hence procesed with the commit phase
+    - Commit phase :: the transaction will either be committed or aborted, depending on the validation check performed during previous phase
+
+* Idempotency
+Ensures that repeated calls with the same input yield the same result
+
+- enhances system reliability by ensuring consistent outcomes
+- allows safe retries without causing duplicate actions
+- prevents data corruption from repeated or failed requests
+- allow systems to retry operations without negative consequences
+- ensure multiple instances can handle requests consistently
+
+* Starvation
+Also has the namo of indefinite blocking
+
+phenomenon associated with the priority scheduling algorithms, in which a process ready for the CPU (resource) can wait to run indefinitely becauso of low priority
+
+* Sharding database
+It is a pattern related to horizontal partitioning - the practice of reparating one table's rows into multiple different tables, known as partitions.
+Each partition has the same schema and columns, but different rows and data.
+
+Sharding involves breaking up one's data into two or more smealler chunks, called logical shards.
+The logical shards are then distributed across separate database nodes, referred to as physical shards, which can hold multiple logical shards.
+Despite this, the data held within all the shards collectively represent an entire logical dataset
+
+Shards are autonomous, they don't share any of the same data or computing resources.
+In some cases, it may make sense to replicate certain tables into each shard to serve as reference tables.
+
+Oftentimes, sharding is implemented at the application level, meaning that the application includes code that defines which shard to transmit reads and writes to.
+Some database management systems have sharding capabilities built in, allowing you to implement sharding directly at the database level.
+
+** Benefits
+- facilitates horizontal scaling
+- query response times are lower, because the query is running on low data, instead of a monolithic database that the query might need to search in all rows
+- helps to make application more reliable by mitigating the impact of outages, with this, if an outage happen, it will likely to affect only a single shard, instead of all the database
+
+** Drawbacks
+- high complexity to implement
+- significant risk that the sharding process can lead to lost data or corrupted tables
+- high impacto on team's workflow
+- shards might become unbalanced
+- once sharded, it is very difficult to return it to unsharded architecture
+- not supported by every database engine
+
+** Sharding architectures
+- key based sharding :: involves using a value taken from newly written data and plugging it into a hash function to determine which shard the data should go to
+- range based sharding :: involves sharding data based on ranges of a given value
+- directory based sharding ::  to implement it is necessary to create and maintain a lookup table that uses a shard key to keep track of which shard holds which data. Main appeal is flexibility. The need for a lookup table before every query or write can have a detrimental impact on an application's performance and it can become a single point of failure
