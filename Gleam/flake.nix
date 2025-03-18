@@ -19,6 +19,7 @@
             buildInputs = with pkgs; [
               erlang
               gleam
+			  rebar3
             ];
           };
         }
