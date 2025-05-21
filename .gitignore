@@ -1,2 +1,8 @@
 *.org~
-*/.direnv/
+**/.direnv/
+
+## Node
+**/node_modules/
+
+## Janet
+*.jimage
