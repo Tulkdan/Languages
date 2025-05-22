@@ -1,0 +1,6 @@
+(print "this environment:")
+(pp (require "./helpers"))
+(print)
+(print "creates these bindings:")
+(use ./helpers)
+(pp (curenv))
