@@ -19,6 +19,7 @@
             buildInputs = with pkgs; [
               janet
               sqlite
+              jpm
             ];
           };
         }
