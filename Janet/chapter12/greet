@@ -1,0 +1,5 @@
+#!/usr/bin/env janet
+(use sh)
+
+($ echo "hey janet" >(file/open "output.txt" :w))
+($ cat output.txt)
